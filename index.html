@@ -1,62 +1,968 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RePhone | Compra e Venda Segura de Celulares</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .glass-effect { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
-        .match-glow:hover { box-shadow: 0 0 20px rgba(34, 197, 94, 0.4); transform: scale(1.02); transition: all 0.3s ease; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Andrea Café Gourmet</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Chart.js para Gráficos Profissionais -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      background-color: #f8f6f0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
 </head>
-<body class="bg-gray-50 font-sans text-gray-900">
+<body class="min-h-screen text-slate-800 flex flex-col justify-between select-none">
 
-    <div class="bg-black text-white py-2 text-center text-xs font-bold tracking-widest uppercase">
-        ⚠️ O APARELHO EM MÃOS! Prefira encontros em locais seguros em Aracruz.
+  <!-- TELA DE LOGIN -->
+  <div id="login-screen" class="flex-1 flex flex-col justify-center items-center px-6 py-12">
+    <div class="w-full max-w-sm bg-white p-8 rounded-3xl shadow-xl border border-amber-100 text-center">
+      <div class="w-20 h-20 bg-amber-800 text-amber-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl shadow-md">
+        <i class="fa-solid fa-mug-hot"></i>
+      </div>
+      <h1 class="text-2xl font-bold text-amber-900 mb-1">Andrea Café Gourmet</h1>
+      <p class="text-sm text-slate-500 mb-6">Controle Profissional de Vendas</p>
+
+      <form id="login-form" class="space-y-4 text-left">
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">E-mail</label>
+          <input type="email" id="email" required placeholder="seu@email.com" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-700 text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Senha</label>
+          <input type="password" id="password" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-700 text-sm">
+        </div>
+        
+        <div id="login-error" class="hidden text-red-600 text-xs text-center bg-red-50 p-3 rounded-xl border border-red-100 font-medium"></div>
+
+        <button type="submit" id="btn-login" class="w-full py-3.5 bg-amber-800 hover:bg-amber-900 text-white font-bold rounded-xl shadow-lg transition active:scale-95">
+          Entrar no Sistema
+        </button>
+      </form>
     </div>
+  </div>
 
-    <nav class="sticky top-0 z-50 glass-effect border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-            <h1 class="text-2xl font-black tracking-tighter text-green-600 italic">RePhone</h1>
-            <div class="hidden md:flex space-x-8 text-sm font-medium">
-                <a href="#" class="hover:text-green-600">Comprar</a>
-                <a href="#" class="hover:text-green-600">Vender</a>
-                <a href="#" class="text-gray-400">Segurança</a>
-            </div>
-            <button class="bg-black text-white px-5 py-2 rounded-full text-sm font-bold">Entrar</button>
+  <!-- PAINEL PRINCIPAL -->
+  <div id="app-screen" class="hidden flex-1 flex flex-col pb-24">
+    <!-- Cabeçalho Fixo -->
+    <header class="bg-amber-900 text-white px-4 py-3 flex justify-between items-center shadow-md sticky top-0 z-20">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-amber-800/80 rounded-full flex items-center justify-center border border-amber-700">
+          <i class="fa-solid fa-mug-hot text-amber-300 text-lg"></i>
         </div>
+        <div>
+          <h2 class="font-bold text-sm leading-tight">Andrea Café Gourmet</h2>
+          <p class="text-[11px] text-amber-200" id="user-display">Carregando...</p>
+        </div>
+      </div>
+      <button id="btn-logout" class="text-xs bg-amber-950/80 hover:bg-black px-3 py-1.5 rounded-lg border border-amber-700/60 active:scale-95">
+        <i class="fa-solid fa-right-from-bracket mr-1"></i> Sair
+      </button>
+    </header>
+
+    <!-- TELA 1: DASHBOARD / INÍCIO -->
+    <main id="tab-inicio" class="p-4 space-y-4 max-w-md mx-auto w-full">
+      <!-- Card Usuário -->
+      <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+        <div>
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Atendente Ativo</span>
+          <span class="font-extrabold text-slate-800 text-lg" id="user-name">---</span>
+        </div>
+        <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sistema Ativo
+        </span>
+      </div>
+
+      <!-- Métricas Financeiras -->
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+          <div class="flex items-center gap-2 text-emerald-600 mb-1">
+            <i class="fa-solid fa-circle-dollar-to-slot text-sm"></i>
+            <p class="text-xs text-slate-500 font-semibold">Vendas Hoje</p>
+          </div>
+          <p class="text-xl font-black text-slate-800" id="dash-vendas-hoje">R$ 0,00</p>
+        </div>
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+          <div class="flex items-center gap-2 text-amber-600 mb-1">
+            <i class="fa-solid fa-chart-line text-sm"></i>
+            <p class="text-xs text-slate-500 font-semibold">Lucro Hoje</p>
+          </div>
+          <p class="text-xl font-black text-amber-700" id="dash-lucro-hoje">R$ 0,00</p>
+        </div>
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+          <div class="flex items-center gap-2 text-blue-600 mb-1">
+            <i class="fa-solid fa-calendar-days text-sm"></i>
+            <p class="text-xs text-slate-500 font-semibold">Vendas Mês</p>
+          </div>
+          <p class="text-xl font-black text-slate-800" id="dash-vendas-mes">R$ 0,00</p>
+        </div>
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+          <div class="flex items-center gap-2 text-red-500 mb-1">
+            <i class="fa-solid fa-triangle-exclamation text-sm"></i>
+            <p class="text-xs text-slate-500 font-semibold">Estoque Baixo</p>
+          </div>
+          <p class="text-xl font-black text-red-600" id="dash-estoque-alerta">0 prod.</p>
+        </div>
+      </div>
+
+      <!-- Gráfico de Desempenho -->
+      <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+        <h3 class="text-xs font-bold uppercase text-slate-400 mb-3 flex items-center gap-2">
+          <i class="fa-solid fa-chart-simple text-amber-800"></i> Desempenho dos Últimos 7 Dias
+        </h3>
+        <div class="w-full h-48">
+          <canvas id="chart-vendas"></canvas>
+        </div>
+      </div>
+
+      <!-- Botão Ação Rápida -->
+      <button onclick="navTo('vendas')" class="w-full py-4 bg-amber-800 hover:bg-amber-900 text-white font-extrabold rounded-2xl shadow-lg flex items-center justify-center gap-2 text-base active:scale-95 transition">
+        <i class="fa-solid fa-cart-plus text-xl"></i> Abrir Ponto de Venda (PDV)
+      </button>
+    </main>
+
+    <!-- TELA 2: PONTO DE VENDA (PDV) -->
+    <main id="tab-vendas" class="hidden p-4 space-y-4 max-w-md mx-auto w-full">
+      <div class="flex justify-between items-center">
+        <div>
+          <h2 class="font-bold text-lg text-slate-800">Ponto de Venda</h2>
+          <p class="text-xs text-slate-500">Selecione os produtos para vender</p>
+        </div>
+        <button id="btn-ver-carrinho" onclick="abrirModalCarrinho()" class="relative bg-amber-800 text-white text-xs font-bold px-3 py-2.5 rounded-xl shadow flex items-center gap-2 active:scale-95">
+          <i class="fa-solid fa-cart-shopping text-sm"></i> Carrinho
+          <span id="cart-count" class="bg-amber-300 text-amber-950 text-[10px] font-black px-1.5 py-0.5 rounded-full">0</span>
+        </button>
+      </div>
+
+      <!-- Seleção de Produtos no PDV -->
+      <div id="pdv-grid-produtos" class="grid grid-cols-2 gap-3">
+        <div class="col-span-2 text-center py-8 text-slate-400 text-sm">Carregando catálogo...</div>
+      </div>
+    </main>
+
+    <!-- TELA 3: CLIENTES -->
+    <main id="tab-clientes" class="hidden p-4 space-y-4 max-w-md mx-auto w-full">
+      <div class="flex justify-between items-center">
+        <div>
+          <h2 class="font-bold text-lg text-slate-800">Clientes & Fiado</h2>
+          <p class="text-xs text-slate-500">Gestão de contatos e valores a receber</p>
+        </div>
+        <button id="btn-abrir-modal-cli" class="bg-amber-800 hover:bg-amber-900 text-white text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1 shadow active:scale-95">
+          <i class="fa-solid fa-user-plus"></i> Novo Cliente
+        </button>
+      </div>
+
+      <!-- Busca de Clientes -->
+      <div class="relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-xs"></i>
+        <input type="text" id="search-cliente" placeholder="Buscar por nome ou telefone..." class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-amber-700 bg-white">
+      </div>
+
+      <!-- Lista de Clientes -->
+      <div id="lista-clientes" class="space-y-3">
+        <div class="text-center py-8 text-slate-400 text-sm">Carregando clientes...</div>
+      </div>
+    </main>
+
+    <!-- TELA 4: ESTOQUE -->
+    <main id="tab-estoque" class="hidden p-4 space-y-4 max-w-md mx-auto w-full">
+      <div class="flex justify-between items-center">
+        <div>
+          <h2 class="font-bold text-lg text-slate-800">Estoque de Produtos</h2>
+          <p class="text-xs text-slate-500">Gerencie e movimente seus itens</p>
+        </div>
+        <button id="btn-abrir-modal-prod" class="bg-amber-800 hover:bg-amber-900 text-white text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1 shadow active:scale-95">
+          <i class="fa-solid fa-plus"></i> Adicionar
+        </button>
+      </div>
+
+      <!-- Lista de Produtos -->
+      <div id="lista-produtos" class="space-y-3">
+        <div class="text-center py-8 text-slate-400 text-sm">Carregando produtos...</div>
+      </div>
+    </main>
+
+    <!-- Navegação Inferior (Mobile Footer Bar) -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around py-2 shadow-2xl z-20">
+      <button onclick="navTo('inicio')" id="nav-btn-inicio" class="flex flex-col items-center text-amber-800 text-[11px] font-bold">
+        <i class="fa-solid fa-house text-lg mb-0.5"></i> Início
+      </button>
+      <button onclick="navTo('vendas')" id="nav-btn-vendas" class="flex flex-col items-center text-slate-400 text-[11px]">
+        <i class="fa-solid fa-cash-register text-lg mb-0.5"></i> Vendas
+      </button>
+      <button onclick="navTo('clientes')" id="nav-btn-clientes" class="flex flex-col items-center text-slate-400 text-[11px]">
+        <i class="fa-solid fa-users text-lg mb-0.5"></i> Clientes
+      </button>
+      <button onclick="navTo('estoque')" id="nav-btn-estoque" class="flex flex-col items-center text-slate-400 text-[11px]">
+        <i class="fa-solid fa-box text-lg mb-0.5"></i> Estoque
+      </button>
     </nav>
+  </div>
 
-    <section class="relative py-20 px-4">
-        <div class="max-w-4xl mx-auto text-center">
-            <span class="bg-green-100 text-green-700 px-4 py-1 rounded-full text-xs font-bold uppercase mb-4 inline-block">
-                📍 Ofertas em Aracruz / ES
-            </span>
-            <h2 class="text-4xl md:text-6xl font-black mb-6 tracking-tight">O match perfeito para o seu próximo celular.</h2>
-            
-            <div class="bg-white p-4 rounded-3xl shadow-2xl border border-gray-100 flex flex-col md:flex-row gap-4">
-                <input type="text" placeholder="Qual modelo busca?" class="flex-1 p-4 rounded-2xl bg-gray-50 border-none focus:ring-2 focus:ring-green-500 outline-none">
-                <input type="number" placeholder="Preço Máximo R$" class="md:w-48 p-4 rounded-2xl bg-gray-50 border-none focus:ring-2 focus:ring-green-500 outline-none">
-                <button class="bg-green-600 text-white px-10 py-4 rounded-2xl font-bold text-lg match-glow">DAR MATCH</button>
-            </div>
+  <!-- MODAL: CARRINHO E FINALIZAÇÃO DE VENDA -->
+  <div id="modal-carrinho" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-50">
+    <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-extrabold text-slate-800 text-base flex items-center gap-2">
+          <i class="fa-solid fa-cart-shopping text-amber-800"></i> Finalizar Venda
+        </h3>
+        <button onclick="fecharModalCarrinho()" class="text-slate-400 hover:text-slate-600 text-xl font-bold p-1">&times;</button>
+      </div>
+
+      <div class="overflow-y-auto space-y-3 flex-1 pr-1 hide-scrollbar" id="carrinho-itens">
+        <!-- Itens do Carrinho serão inseridos via JS -->
+      </div>
+
+      <div class="border-t pt-3 space-y-3">
+        <!-- Cliente da Venda -->
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Cliente</label>
+          <select id="venda-cliente-select" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-amber-700 bg-slate-50 font-medium">
+            <option value="balcao">Venda Balcão (Não Identificado)</option>
+          </select>
         </div>
-    </section>
 
-    <footer class="bg-gray-900 text-gray-400 py-12 px-4 mt-20">
-        <div class="max-w-7xl mx-auto border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-6">
-            <p class="text-sm">RePhone © 2026 — V 4.7.2 | Proteção Sentinel-Guard Ativa</p>
-            
-            <div class="bg-black border border-green-900/50 p-3 rounded-lg font-mono text-[10px] w-full md:w-auto">
-                <div class="flex items-center gap-2 mb-1">
-                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                    <span class="text-green-500 uppercase tracking-tighter">Status da Coalizão: Ativa</span>
+        <!-- Forma de Pagamento -->
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Forma de Pagamento</label>
+          <div class="grid grid-cols-3 gap-1.5" id="grupo-pagamento">
+            <button type="button" onclick="selectPagamento('PIX')" id="pag-PIX" class="py-2 text-[11px] font-bold rounded-xl border border-amber-700 bg-amber-50 text-amber-900">
+              <i class="fa-brands fa-pix text-emerald-600 block text-sm mb-0.5"></i> Pix
+            </button>
+            <button type="button" onclick="selectPagamento('CREDITO')" id="pag-CREDITO" class="py-2 text-[11px] font-bold rounded-xl border border-slate-200 text-slate-600">
+              <i class="fa-solid fa-credit-card block text-sm mb-0.5"></i> Crédito
+            </button>
+            <button type="button" onclick="selectPagamento('DEBITO')" id="pag-DEBITO" class="py-2 text-[11px] font-bold rounded-xl border border-slate-200 text-slate-600">
+              <i class="fa-solid fa-credit-card block text-sm mb-0.5"></i> Débito
+            </button>
+            <button type="button" onclick="selectPagamento('DINHEIRO')" id="pag-DINHEIRO" class="py-2 text-[11px] font-bold rounded-xl border border-slate-200 text-slate-600">
+              <i class="fa-solid fa-money-bill-wave block text-sm mb-0.5"></i> Dinheiro
+            </button>
+            <button type="button" onclick="selectPagamento('FIADO')" id="pag-FIADO" class="py-2 text-[11px] font-bold rounded-xl border border-slate-200 text-slate-600">
+              <i class="fa-solid fa-handshake block text-sm mb-0.5"></i> Fiado
+            </button>
+          </div>
+        </div>
+
+        <!-- Troco (se Dinheiro) -->
+        <div id="box-troco" class="hidden grid grid-cols-2 gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+          <div>
+            <label class="block text-[10px] font-bold uppercase text-slate-500">Valor Recebido</label>
+            <input type="number" id="valor-recebido" step="0.01" placeholder="0.00" class="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-800">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold uppercase text-slate-500">Troco</label>
+            <div id="valor-troco" class="text-sm font-black text-emerald-700 py-1.5">R$ 0,00</div>
+          </div>
+        </div>
+
+        <!-- Total -->
+        <div class="flex justify-between items-center bg-amber-50 p-3 rounded-xl border border-amber-200">
+          <span class="text-xs font-extrabold uppercase text-amber-900">Total da Venda</span>
+          <span id="cart-total" class="text-xl font-black text-amber-900">R$ 0,00</span>
+        </div>
+
+        <button onclick="finalizarVenda()" id="btn-concluir-venda" class="w-full py-3.5 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold rounded-xl shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-check-circle text-lg"></i> Confirmar e Concluir Venda
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CADASTRAR CLIENTE -->
+  <div id="modal-cliente" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center border-b pb-2">
+        <h3 class="font-bold text-slate-800">Novo Cliente</h3>
+        <button id="btn-fechar-modal-cli" class="text-slate-400 text-lg font-bold">&times;</button>
+      </div>
+      <form id="form-cliente" class="space-y-3 text-left">
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Nome Completo</label>
+          <input type="text" id="cli-nome" required placeholder="Ex: Maria Silva" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-amber-700">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">WhatsApp / Telefone</label>
+          <input type="tel" id="cli-telefone" placeholder="(27) 99999-9999" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-amber-700">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Observações</label>
+          <input type="text" id="cli-obs" placeholder="Ex: Prefere café moido fino" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-amber-700">
+        </div>
+        <button type="submit" class="w-full py-3 bg-amber-800 hover:bg-amber-900 text-white font-bold rounded-xl shadow text-xs transition active:scale-95 mt-2">
+          Salvar Cliente
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CADASTRAR PRODUTO / ESTOQUE -->
+  <div id="modal-produto" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center border-b pb-2">
+        <h3 class="font-bold text-slate-800">Adicionar ao Estoque</h3>
+        <button id="btn-fechar-modal-prod" class="text-slate-400 text-lg font-bold">&times;</button>
+      </div>
+      
+      <form id="form-produto" class="space-y-3 text-left">
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Selecionar da Tabela</label>
+          <select id="prod-select-tabela" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-amber-700 bg-amber-50/50 font-medium text-amber-900">
+            <option value="">-- Escolha um produto da lista --</option>
+            <option value="Tradicional 250g" data-custo="12.20" data-venda="15.85">Tradicional 250g</option>
+            <option value="Tradicional 500g" data-custo="23.05" data-venda="28.90">Tradicional 500g</option>
+            <option value="Gourmet 250g" data-custo="18.52" data-venda="24.95">Gourmet 250g</option>
+            <option value="Gourmet 500g" data-custo="27.74" data-venda="38.90">Gourmet 500g</option>
+            <option value="Especial 250g" data-custo="18.09" data-venda="27.17">Especial 250g</option>
+            <option value="Especial 500g" data-custo="30.52" data-venda="45.84">Especial 500g</option>
+            <option value="outro">-- Digitar Outro Produto --</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Nome do Produto</label>
+          <input type="text" id="prod-nome" required placeholder="Ex: Café Gourmet 500g" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-amber-700">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Categoria</label>
+          <input type="text" id="prod-categoria" value="Moído" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-amber-700">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Custo (R$)</label>
+            <input type="number" step="0.01" id="prod-custo" required placeholder="0.00" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-amber-700">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Venda (R$)</label>
+            <input type="number" step="0.01" id="prod-venda" required placeholder="0.00" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-amber-700">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Unidades (+)</label>
+            <input type="number" id="prod-estoque" min="1" required value="1" class="w-full px-3 py-2 rounded-xl border border-amber-300 bg-amber-50 font-bold text-amber-900 text-xs focus:outline-none focus:ring-2 focus:ring-amber-700">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Mínimo</label>
+            <input type="number" id="prod-minimo" required value="5" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-amber-700">
+          </div>
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-amber-800 hover:bg-amber-900 text-white font-bold rounded-xl shadow text-xs transition active:scale-95 mt-2">
+          Sincronizar com Estoque
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- FIREBASE JS -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, addDoc, collection, onSnapshot, updateDoc, query, where, getDocs, orderBy, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBiN8FqX8UZeyAh1cG2GHZtQWiQH0xPBV4",
+      authDomain: "rephone-a0a80.firebaseapp.com",
+      projectId: "rephone-a0a80",
+      storageBucket: "rephone-a0a80.firebasestorage.app",
+      messagingSenderId: "431497247030",
+      appId: "1:431497247030:web:a943715e4acc04b8995b97",
+      measurementId: "G-LHRJ19C0CW"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let usuarioAtual = { uid: '', nome: '' };
+    let produtosCache = [];
+    let clientesCache = [];
+    let carrinho = [];
+    let formaPagamento = 'PIX';
+    let chartVendasInstance = null;
+
+    // Navegação entre Telas
+    window.navTo = function(tab) {
+      document.getElementById('tab-inicio').classList.add('hidden');
+      document.getElementById('tab-vendas').classList.add('hidden');
+      document.getElementById('tab-clientes').classList.add('hidden');
+      document.getElementById('tab-estoque').classList.add('hidden');
+      document.getElementById(`tab-${tab}`).classList.remove('hidden');
+
+      ['inicio', 'vendas', 'clientes', 'estoque'].forEach(t => {
+        const btn = document.getElementById(`nav-btn-${t}`);
+        if (t === tab) {
+          btn.className = "flex flex-col items-center text-amber-800 text-[11px] font-bold";
+        } else {
+          btn.className = "flex flex-col items-center text-slate-400 text-[11px]";
+        }
+      });
+    };
+
+    function getNomeUsuario(email) {
+      if (!email) return 'Usuário';
+      if (email.toLowerCase().includes('andrea')) return 'Andrea';
+      if (email.toLowerCase().includes('fabio')) return 'Fabio';
+      return email.split('@')[0];
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const nome = getNomeUsuario(user.email);
+        usuarioAtual = { uid: user.uid, nome: nome };
+
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('app-screen').classList.remove('hidden');
+        document.getElementById('user-display').textContent = `Logado como ${nome}`;
+        document.getElementById('user-name').textContent = nome;
+
+        ouvirProdutos();
+        ouvirClientes();
+        ouvirVendasEDashboard();
+
+      } else {
+        document.getElementById('login-screen').classList.remove('hidden');
+        document.getElementById('app-screen').classList.add('hidden');
+      }
+    });
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (error) {
+        const err = document.getElementById('login-error');
+        err.textContent = "Erro ao entrar. Verifique e-mail e senha.";
+        err.classList.remove('hidden');
+      }
+    });
+
+    document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
+
+    // OUVER PRODUTOS E ATUALIZAR CATÁLOGO PDV + ESTOQUE
+    function ouvirProdutos() {
+      onSnapshot(collection(db, "produtos"), (snapshot) => {
+        produtosCache = [];
+        const listaEstoque = document.getElementById('lista-produtos');
+        const gridPDV = document.getElementById('pdv-grid-produtos');
+        
+        if (snapshot.empty) {
+          listaEstoque.innerHTML = `<div class="bg-white p-6 rounded-2xl text-center text-slate-400 text-sm">Nenhum produto cadastrado.</div>`;
+          gridPDV.innerHTML = `<div class="col-span-2 bg-white p-6 rounded-2xl text-center text-slate-400 text-sm">Nenhum produto disponível para venda.</div>`;
+          return;
+        }
+
+        listaEstoque.innerHTML = '';
+        gridPDV.innerHTML = '';
+        let alertasEstoque = 0;
+
+        snapshot.forEach((docSnap) => {
+          const prod = docSnap.data();
+          const id = docSnap.id;
+          produtosCache.push({ id, ...prod });
+
+          const estoqueBaixo = prod.estoqueAtual <= prod.estoqueMinimo;
+          if (estoqueBaixo) alertasEstoque++;
+
+          // Item na Tela de Estoque
+          listaEstoque.innerHTML += `
+            <div class="bg-white p-4 rounded-2xl shadow-sm border ${estoqueBaixo ? 'border-amber-400 bg-amber-50/30' : 'border-slate-100'} flex items-center justify-between">
+              <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                  <h4 class="font-bold text-slate-800 text-sm">${prod.nome}</h4>
+                  ${estoqueBaixo ? '<span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-1.5 py-0.5 rounded-full">Estoque Baixo</span>' : ''}
                 </div>
-                <p id="ia-log-status">> [Fmrpbr]: Sincronização com Senhor Fabio Oliveira concluída.</p>
-                <p id="ia-log-geo">> [Geo-Logic]: Buscando dispositivos em Aracruz...</p>
+                <p class="text-xs text-slate-500">${prod.categoria || 'Moído'} • Custo: R$ ${Number(prod.precoCompra).toFixed(2)} • Venda: R$ ${Number(prod.precoVenda).toFixed(2)}</p>
+                <div class="text-xs text-slate-600">
+                  Estoque: <span class="font-bold text-slate-900 text-sm">${prod.estoqueAtual} unid.</span> <span class="text-slate-400">(Mín: ${prod.estoqueMinimo})</span>
+                </div>
+              </div>
             </div>
-        </div>
-    </footer>
+          `;
 
+          // Card na Tela de Vendas (PDV)
+          gridPDV.innerHTML += `
+            <div onclick="adicionarAoCarrinho('${id}')" class="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between active:scale-95 transition cursor-pointer hover:border-amber-700">
+              <div>
+                <span class="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full">${prod.categoria || 'Café'}</span>
+                <h4 class="font-extrabold text-slate-800 text-sm mt-1.5 leading-tight">${prod.nome}</h4>
+                <p class="text-xs text-slate-400 mt-0.5">Estoque: ${prod.estoqueAtual}</p>
+              </div>
+              <div class="mt-3 flex justify-between items-center border-t pt-2">
+                <span class="font-black text-amber-900 text-sm">R$ ${Number(prod.precoVenda).toFixed(2)}</span>
+                <span class="w-7 h-7 bg-amber-800 text-white rounded-xl flex items-center justify-center text-xs"><i class="fa-solid fa-plus"></i></span>
+              </div>
+            </div>
+          `;
+        });
+
+        document.getElementById('dash-estoque-alerta').textContent = `${alertasEstoque} prod.`;
+      });
+    }
+
+    // GESTÃO DE CLIENTES
+    function ouvirClientes() {
+      onSnapshot(collection(db, "clientes"), (snapshot) => {
+        clientesCache = [];
+        const lista = document.getElementById('lista-clientes');
+        const selectVenda = document.getElementById('venda-cliente-select');
+        
+        selectVenda.innerHTML = `<option value="balcao">Venda Balcão (Não Identificado)</option>`;
+        
+        if (snapshot.empty) {
+          lista.innerHTML = `<div class="bg-white p-6 rounded-2xl text-center text-slate-400 text-sm">Nenhum cliente cadastrado.</div>`;
+          return;
+        }
+
+        lista.innerHTML = '';
+        snapshot.forEach((docSnap) => {
+          const cli = docSnap.data();
+          const id = docSnap.id;
+          clientesCache.push({ id, ...cli });
+
+          selectVenda.innerHTML += `<option value="${id}">${cli.nome} ${cli.saldoDevedor > 0 ? `(Devendo R$ ${cli.saldoDevedor.toFixed(2)})` : ''}</option>`;
+
+          lista.innerHTML += `
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+              <div>
+                <h4 class="font-extrabold text-slate-800 text-sm">${cli.nome}</h4>
+                <p class="text-xs text-slate-500"><i class="fa-brands fa-whatsapp text-emerald-600"></i> ${cli.telefone || 'Sem telefone'}</p>
+                ${cli.saldoDevedor > 0 ? `<p class="text-xs font-bold text-red-600 mt-1">Devendo (Fiado): R$ ${cli.saldoDevedor.toFixed(2)}</p>` : `<p class="text-[11px] text-emerald-600 font-semibold mt-0.5">Sem débitos</p>`}
+              </div>
+              ${cli.saldoDevedor > 0 ? `
+                <button onclick="quitarFiado('${id}', '${cli.nome}', ${cli.saldoDevedor})" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-3 py-2 rounded-xl shadow active:scale-95">
+                  <i class="fa-solid fa-hand-holding-dollar"></i> Baixa
+                </button>
+              ` : ''}
+            </div>
+          `;
+        });
+      });
+    }
+
+    // FUNÇÃO DO CARRINHO PDV
+    window.adicionarAoCarrinho = function(idProd) {
+      const prod = produtosCache.find(p => p.id === idProd);
+      if (!prod) return;
+
+      const itemExistente = carrinho.find(i => i.id === idProd);
+      if (itemExistente) {
+        if (itemExistente.qtd >= prod.estoqueAtual) {
+          alert("Quantidade máxima de estoque atingida para este item.");
+          return;
+        }
+        itemExistente.qtd++;
+      } else {
+        if (prod.estoqueAtual <= 0) {
+          alert("Produto sem estoque disponível!");
+          return;
+        }
+        carrinho.push({
+          id: prod.id,
+          nome: prod.nome,
+          precoVenda: prod.precoVenda,
+          precoCompra: prod.precoCompra,
+          qtd: 1
+        });
+      }
+      atualizarBadgeCarrinho();
+    };
+
+    function atualizarBadgeCarrinho() {
+      const totalItens = carrinho.reduce((acc, i) => acc + i.qtd, 0);
+      document.getElementById('cart-count').textContent = totalItens;
+    }
+
+    window.abrirModalCarrinho = function() {
+      if (carrinho.length === 0) {
+        alert("Seu carrinho está vazio! Clique nos produtos para adicionar.");
+        return;
+      }
+      renderCarrinho();
+      document.getElementById('modal-carrinho').classList.remove('hidden');
+    };
+
+    window.fecharModalCarrinho = function() {
+      document.getElementById('modal-carrinho').classList.add('hidden');
+    };
+
+    function renderCarrinho() {
+      const container = document.getElementById('carrinho-itens');
+      container.innerHTML = '';
+      let total = 0;
+
+      carrinho.forEach((item, index) => {
+        const subtotal = item.precoVenda * item.qtd;
+        total += subtotal;
+
+        container.innerHTML += `
+          <div class="flex justify-between items-center bg-slate-50 p-3 rounded-2xl border border-slate-200">
+            <div>
+              <h5 class="font-bold text-slate-800 text-xs">${item.nome}</h5>
+              <p class="text-[11px] text-slate-500">R$ ${item.precoVenda.toFixed(2)} UN</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="alterarQtdCarrinho(${index}, -1)" class="w-7 h-7 bg-white border text-slate-700 font-bold rounded-lg flex items-center justify-center text-xs active:scale-95">-</button>
+              <span class="font-black text-xs text-slate-800 w-4 text-center">${item.qtd}</span>
+              <button onclick="alterarQtdCarrinho(${index}, 1)" class="w-7 h-7 bg-white border text-slate-700 font-bold rounded-lg flex items-center justify-center text-xs active:scale-95">+</button>
+              <span class="font-black text-xs text-amber-900 ml-2">R$ ${subtotal.toFixed(2)}</span>
+            </div>
+          </div>
+        `;
+      });
+
+      document.getElementById('cart-total').textContent = `R$ ${total.toFixed(2)}`;
+      calcularTroco();
+    }
+
+    window.alterarQtdCarrinho = function(index, delta) {
+      carrinho[index].qtd += delta;
+      if (carrinho[index].qtd <= 0) {
+        carrinho.splice(index, 1);
+      }
+      if (carrinho.length === 0) {
+        fecharModalCarrinho();
+      } else {
+        renderCarrinho();
+      }
+      atualizarBadgeCarrinho();
+    };
+
+    window.selectPagamento = function(tipo) {
+      formaPagamento = tipo;
+      ['PIX', 'CREDITO', 'DEBITO', 'DINHEIRO', 'FIADO'].forEach(t => {
+        const btn = document.getElementById(`pag-${t}`);
+        if (t === tipo) {
+          btn.className = "py-2 text-[11px] font-bold rounded-xl border border-amber-700 bg-amber-50 text-amber-900";
+        } else {
+          btn.className = "py-2 text-[11px] font-bold rounded-xl border border-slate-200 text-slate-600";
+        }
+      });
+
+      const boxTroco = document.getElementById('box-troco');
+      if (tipo === 'DINHEIRO') {
+        boxTroco.classList.remove('hidden');
+      } else {
+        boxTroco.classList.add('hidden');
+      }
+    };
+
+    document.getElementById('valor-recebido').addEventListener('input', calcularTroco);
+
+    function calcularTroco() {
+      const total = carrinho.reduce((acc, i) => acc + (i.precoVenda * i.qtd), 0);
+      const recebido = parseFloat(document.getElementById('valor-recebido').value) || 0;
+      const troco = recebido - total;
+      document.getElementById('valor-troco').textContent = `R$ ${troco > 0 ? troco.toFixed(2) : '0,00'}`;
+    }
+
+    // FINALIZAR A VENDA
+    window.finalizarVenda = async function() {
+      if (carrinho.length === 0) return;
+
+      const clienteSelect = document.getElementById('venda-cliente-select').value;
+      const totalVenda = carrinho.reduce((acc, i) => acc + (i.precoVenda * i.qtd), 0);
+      const custoTotal = carrinho.reduce((acc, i) => acc + (i.precoCompra * i.qtd), 0);
+      const lucroVenda = totalVenda - custoTotal;
+
+      let clienteNome = "Balcão";
+      let clienteTelefone = "";
+
+      if (clienteSelect !== 'balcao') {
+        const cli = clientesCache.find(c => c.id === clienteSelect);
+        if (cli) {
+          clienteNome = cli.nome;
+          clienteTelefone = cli.telefone || "";
+        }
+      }
+
+      if (formaPagamento === 'FIADO' && clienteSelect === 'balcao') {
+        alert("Para vendas FIADO, selecione um cliente cadastrado!");
+        return;
+      }
+
+      try {
+        // Registra Venda
+        const vendaRef = await addDoc(collection(db, "vendas"), {
+          itens: carrinho,
+          total: totalVenda,
+          custoTotal: custoTotal,
+          lucro: lucroVenda,
+          formaPagamento: formaPagamento,
+          clienteId: clienteSelect,
+          clienteNome: clienteNome,
+          vendedorUid: usuarioAtual.uid,
+          vendedorNome: usuarioAtual.nome,
+          data: new Date()
+        });
+
+        // Baixa no Estoque de cada item
+        for (const item of carrinho) {
+          await updateDoc(doc(db, "produtos", item.id), {
+            estoqueAtual: increment(-item.qtd)
+          });
+        }
+
+        // Se for FIADO, soma na conta do cliente
+        if (formaPagamento === 'FIADO' && clienteSelect !== 'balcao') {
+          await updateDoc(doc(db, "clientes", clienteSelect), {
+            saldoDevedor: increment(totalVenda)
+          });
+        }
+
+        // Pergunta se deseja enviar comprovante no WhatsApp
+        if (clienteTelefone) {
+          const enviar = confirm("Venda concluída! Deseja enviar o recibo pelo WhatsApp do cliente?");
+          if (enviar) {
+            gerarReciboWhatsApp(clienteTelefone, clienteNome, carrinho, totalVenda, formaPagamento);
+          }
+        } else {
+          alert("Venda realizada com sucesso!");
+        }
+
+        carrinho = [];
+        atualizarBadgeCarrinho();
+        fecharModalCarrinho();
+
+      } catch (err) {
+        alert("Erro ao finalizar venda: " + err.message);
+      }
+    };
+
+    function gerarReciboWhatsApp(telefone, cliente, itens, total, pagamento) {
+      let num = telefone.replace(/\D/g, '');
+      if (!num.startsWith('55')) num = '55' + num;
+
+      let texto = `*☕ Andrea Café Gourmet*\n`;
+      texto += `*Comprovante de Compra*\n\n`;
+      texto += `Cliente: ${cliente}\n`;
+      texto += `Pagamento: ${pagamento}\n`;
+      texto += `-----------------------------\n`;
+      itens.forEach(i => {
+        texto += `${i.qtd}x ${i.nome} - R$ ${(i.precoVenda * i.qtd).toFixed(2)}\n`;
+      });
+      texto += `-----------------------------\n`;
+      texto += `*Total: R$ ${total.toFixed(2)}*\n\n`;
+      texto += `Obrigado pela preferência! 😊`;
+
+      window.open(`https://api.whatsapp.com/send?phone=${num}&text=${encodeURIComponent(texto)}`, '_blank');
+    }
+
+    // DAR BAIXA EM FIADO
+    window.quitarFiado = async function(id, nome, valorAtual) {
+      const valorPago = prompt(`Dar baixa na conta de ${nome}.\nValor devido: R$ ${valorAtual.toFixed(2)}\nDigite o valor pago:`, valorAtual);
+      if (!valorPago) return;
+
+      const valor = parseFloat(valorPago);
+      if (isNaN(valor) || valor <= 0) {
+        alert("Valor inválido.");
+        return;
+      }
+
+      const novoSaldo = valorAtual - valor < 0 ? 0 : valorAtual - valor;
+
+      try {
+        await updateDoc(doc(db, "clientes", id), {
+          saldoDevedor: novoSaldo
+        });
+
+        await addDoc(collection(db, "pagamentos_fiado"), {
+          clienteId: id,
+          clienteNome: nome,
+          valorPago: valor,
+          usuarioUid: usuarioAtual.uid,
+          data: new Date()
+        });
+
+        alert("Pagamento registrado com sucesso!");
+      } catch (e) {
+        alert("Erro ao dar baixa: " + e.message);
+      }
+    };
+
+    // DASHBOARD E RELATÓRIOS
+    function ouvirVendasEDashboard() {
+      onSnapshot(collection(db, "vendas"), (snapshot) => {
+        let faturamentoHoje = 0;
+        let lucroHoje = 0;
+        let faturamentoMes = 0;
+
+        const hoje = new Date();
+        const inicioHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+        const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+
+        // Agrupamento para o gráfico dos últimos 7 dias
+        const diasSete = Array(7).fill(0);
+        const labelsSete = [];
+        for (let i = 6; i >= 0; i--) {
+          const d = new Date();
+          d.setDate(d.getDate() - i);
+          labelsSete.push(`${d.getDate()}/${d.getMonth()+1}`);
+        }
+
+        snapshot.forEach((docSnap) => {
+          const v = docSnap.data();
+          const dataVenda = v.data ? v.data.toDate() : new Date();
+
+          if (dataVenda >= inicioHoje) {
+            faturamentoHoje += v.total || 0;
+            lucroHoje += v.lucro || 0;
+          }
+
+          if (dataVenda >= inicioMes) {
+            faturamentoMes += v.total || 0;
+          }
+
+          // Para o gráfico de 7 dias
+          const diffDias = Math.floor((hoje - dataVenda) / (1000 * 60 * 60 * 24));
+          if (diffDias >= 0 && diffDias < 7) {
+            diasSete[6 - diffDias] += v.total || 0;
+          }
+        });
+
+        document.getElementById('dash-vendas-hoje').textContent = `R$ ${faturamentoHoje.toFixed(2)}`;
+        document.getElementById('dash-lucro-hoje').textContent = `R$ ${lucroHoje.toFixed(2)}`;
+        document.getElementById('dash-vendas-mes').textContent = `R$ ${faturamentoMes.toFixed(2)}`;
+
+        renderGrafico(labelsSete, diasSete);
+      });
+    }
+
+    function renderGrafico(labels, data) {
+      const ctx = document.getElementById('chart-vendas').getContext('2d');
+      if (chartVendasInstance) chartVendasInstance.destroy();
+
+      chartVendasInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Vendas (R$)',
+            data: data,
+            borderColor: '#92400e',
+            backgroundColor: 'rgba(146, 64, 14, 0.1)',
+            fill: true,
+            tension: 0.3,
+            borderWidth: 3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, grid: { display: false } },
+            x: { grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    // MODAL PRODUTO
+    const modalProd = document.getElementById('modal-produto');
+    document.getElementById('btn-abrir-modal-prod').addEventListener('click', () => {
+      document.getElementById('form-produto').reset();
+      document.getElementById('prod-categoria').value = "Moído";
+      modalProd.classList.remove('hidden');
+    });
+    document.getElementById('btn-fechar-modal-prod').addEventListener('click', () => modalProd.classList.add('hidden'));
+
+    document.getElementById('prod-select-tabela').addEventListener('change', (e) => {
+      const selectedOption = e.target.options[e.target.selectedIndex];
+      const nome = selectedOption.value;
+
+      if (nome && nome !== 'outro') {
+        document.getElementById('prod-nome').value = nome;
+        document.getElementById('prod-custo').value = selectedOption.getAttribute('data-custo');
+        document.getElementById('prod-venda').value = selectedOption.getAttribute('data-venda');
+        document.getElementById('prod-categoria').value = "Moído";
+      }
+    });
+
+    document.getElementById('form-produto').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nome = document.getElementById('prod-nome').value.trim();
+      const categoria = document.getElementById('prod-categoria').value.trim() || 'Moído';
+      const custo = parseFloat(document.getElementById('prod-custo').value);
+      const venda = parseFloat(document.getElementById('prod-venda').value);
+      const unidadesAdicionadas = parseInt(document.getElementById('prod-estoque').value);
+      const minimo = parseInt(document.getElementById('prod-minimo').value);
+
+      try {
+        const q = query(collection(db, "produtos"), where("nome", "==", nome));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          const prodDoc = querySnapshot.docs[0];
+          const prodAtual = prodDoc.data();
+          await updateDoc(doc(db, "produtos", prodDoc.id), {
+            categoria,
+            precoCompra: custo,
+            precoVenda: venda,
+            estoqueAtual: prodAtual.estoqueAtual + unidadesAdicionadas,
+            estoqueMinimo: minimo,
+            dataAtualizacao: new Date()
+          });
+        } else {
+          await addDoc(collection(db, "produtos"), {
+            nome,
+            categoria,
+            precoCompra: custo,
+            precoVenda: venda,
+            estoqueAtual: unidadesAdicionadas,
+            estoqueMinimo: minimo,
+            ativo: true,
+            dataAtualizacao: new Date()
+          });
+        }
+
+        document.getElementById('form-produto').reset();
+        modalProd.classList.add('hidden');
+      } catch (err) {
+        alert("Erro ao salvar produto: " + err.message);
+      }
+    });
+
+    // MODAL CLIENTE
+    const modalCli = document.getElementById('modal-cliente');
+    document.getElementById('btn-abrir-modal-cli').addEventListener('click', () => modalCli.classList.remove('hidden'));
+    document.getElementById('btn-fechar-modal-cli').addEventListener('click', () => modalCli.classList.add('hidden'));
+
+    document.getElementById('form-cliente').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nome = document.getElementById('cli-nome').value.trim();
+      const telefone = document.getElementById('cli-telefone').value.trim();
+      const obs = document.getElementById('cli-obs').value.trim();
+
+      try {
+        await addDoc(collection(db, "clientes"), {
+          nome,
+          telefone,
+          observacoes: obs,
+          saldoDevedor: 0,
+          dataCadastro: new Date()
+        });
+
+        document.getElementById('form-cliente').reset();
+        modalCli.classList.add('hidden');
+      } catch (err) {
+        alert("Erro ao cadastrar cliente: " + err.message);
+      }
+    });
+  </script>
 </body>
 </html>
